@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
 
-	public float Speed = 0.1f;
+	public float Speed = 5f;
 	public GameObject GameManager;
 
 	private int State = 0;
@@ -13,10 +13,11 @@ public class PlayerMovement : MonoBehaviour {
 	private Vector3 Direction;
 
 	private Queue<Vector3> Route = new Queue<Vector3>();
+	//private Vector3[] Route = new Vector3[1];
 
 	// Use this for initialization
 	void Start () {
-		
+
 	}
 	
 	// Update is called once per frame
@@ -30,17 +31,20 @@ public class PlayerMovement : MonoBehaviour {
 				EndPosition = transform.position + Direction;
 			}
 
-			transform.position += Speed * Vector3.Normalize(Direction);
+			transform.position += Speed * Time.deltaTime * Vector3.Normalize(Direction);
 
 			if (Vector3.Distance(transform.position,StartPosition) >= Vector3.Distance(EndPosition,StartPosition)) {
 				transform.position = EndPosition;
 				Direction = Vector3.zero;
 				if (Route.Count == 0) {
 					State = 0;
-					GameManager.GetComponent<Game1> ().NextPuzzle ();
+					GameManager.GetComponent<UFO_PuzzleManager> ().NextPuzzle ();
+					GameManager.GetComponent<UFO_PuzzleManager> ().ResetGame ();
+					GameManager.GetComponent<UFO_UIManager> ().ResetUI ();
 				}
 			}
 		}
+
 	}
 
 	public void Move (Vector3[] route) {
