@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/VectorUnknown/Scenes/Game1.unity
+- path: Assets/VectorUnknown/Scenes/VectorGame.unity
   isLoaded: 1
   isActive: 1
