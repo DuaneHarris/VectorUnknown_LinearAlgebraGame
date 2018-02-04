@@ -13,6 +13,7 @@ public class PlayerMovement : MonoBehaviour {
 	private Vector3 Direction;
 
 	private Queue<Vector3> Route = new Queue<Vector3>();
+	private int GameMode;
 	//private Vector3[] Route = new Vector3[1];
 
 	// Use this for initialization
@@ -38,6 +39,7 @@ public class PlayerMovement : MonoBehaviour {
 				Direction = Vector3.zero;
 				if (Route.Count == 0) {
 					State = 0;
+					GameManager.GetComponent<UFO_PuzzleManager> ().ChangeGameMode ();
 					GameManager.GetComponent<UFO_PuzzleManager> ().NextPuzzle ();
 					GameManager.GetComponent<UFO_PuzzleManager> ().ResetGame ();
 					GameManager.GetComponent<UFO_UIManager> ().ResetUI ();

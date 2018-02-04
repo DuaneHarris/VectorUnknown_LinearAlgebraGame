@@ -6,8 +6,8 @@ using UnityEngine.UI;
 public class UFO_UIManager : MonoBehaviour {
 
 	private GameObject Player;
-	public float Height = 2.5f;
-	public int GridSpacing = 1;
+	private int GridSpacing = 1;
+	private float Height = 2.5f;
 
 	public LineRenderer[] Arrows = new LineRenderer[2];
 	public Text[] ChoiceText = new Text[4];
@@ -30,8 +30,8 @@ public class UFO_UIManager : MonoBehaviour {
 	void Start () {
 
 		Player = GetComponent<UFO_PuzzleManager> ().Player;
-		Height = GetComponent<UFO_UIManager> ().Height;
-		GridSpacing = GetComponent<UFO_UIManager> ().GridSpacing;
+		Height = GetComponent<UFO_PuzzleManager> ().Height;
+		GridSpacing = GetComponent<UFO_PuzzleManager> ().GridSpacing;
 		for (int i = 0; i < SelectedVectors.Length; i++) {
 			SelectedVectors [i] = Vector2.zero;
 			SelectedVectorText[i].text = SelectedVectors [i].x.ToString ("F0") + "\n"

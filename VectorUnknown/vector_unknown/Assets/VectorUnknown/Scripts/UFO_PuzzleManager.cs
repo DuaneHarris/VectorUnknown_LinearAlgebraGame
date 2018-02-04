@@ -5,10 +5,10 @@ using UnityEngine.UI;
 
 public class UFO_PuzzleManager : MonoBehaviour {
 
-	public int GridSpacing = 1;					//Grid Spacing on the Game Board
+	public int GridSpacing = 1;					    //Grid Spacing on the Game Board
 	public float Height = 2.5f;						//Y Value of Player and Goal
 	public GameObject Player;
-	public GameObject Goal;
+	public GameObject[] Goal = new GameObject[2];
 
 	public Vector2[] Choices = new Vector2[4];			//Container for Vectors in the form used for UI Text
 	public int[] ButtonMap;
@@ -16,11 +16,13 @@ public class UFO_PuzzleManager : MonoBehaviour {
 
 	public System.Random rnd = new System.Random ();
 
+	private Vector3[] GoalPosition = new Vector3[2];
 	private Vector3[] Route = new Vector3[2];       //The Path that the Player Must Take to Reach the Goal
 	private Vector2[] BaseVectors = new Vector2[9]; //The Basic Vectors that the game will use to create puzzles
 	private int[] Num = new int[2];					//Container for the random index numbers of the BaseVectors array
 	private int[] Quad = new int[2];				//Container for the random quadrant number (changes direction of vectors)
 	private int[] Mul = new int[2];					//Container for the random constant that extends the length of the vectors
+	private int GameMode;
 
 	// Use this for initialization
 	void Start () {
@@ -38,14 +40,15 @@ public class UFO_PuzzleManager : MonoBehaviour {
 		BaseVectors [7] = new Vector3 (2, 3);
 		BaseVectors [8] = new Vector3 (3, 2);
 
+		GameMode = 0;
 		NextPuzzle (); //Create 1st Puzzle
 		ResetGame (); //Set Up Game Board
 
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
-		
+
 	}
 
 	public void NextPuzzle () {
@@ -79,12 +82,12 @@ public class UFO_PuzzleManager : MonoBehaviour {
 			if (Num [i] <= 2) {              // If the vector is <1,1>, <1,0>, or <0,1>, then the Mul[i] can be from 2-10, 
 				Mul [i] = rnd.Next (2, 11);  // Mul[i] = constant that will determine goal placement -- Max: <10,10>, <10,0>, <0,10>
 				if (Mul [i] == 6) {          // To keep the vectors "nice", only certain constants can multiply Choices
-					int n = rnd.Next (2, 5); // If Mul[i]=6, Choices can be multiplied by 2,3,6 (Since 6 is divisible by 2,3,6)
+					int n = rnd.Next (2, 5); // If Mul[i]=6, Choices[i+2] can be multiplied by 2,3,6 (Since 6 is divisible by 2,3,6)
 					if (n == 4) n = 6;       // 4 Maps to 6
 					Choices [i + 2] = Choices [i] * n; // Add vector that is linearly dependent with Choices[i]
 				} 
-				else if (Mul [i] == 10) {    // If Mul[i]=10, Choices can be multiplied by 2,3,10
-					int n = rnd.Next (2, 5); // Since 10 is divisible by 2,3,10
+				else if (Mul [i] == 10) {    // If Mul[i]=10, Choices[i+2] can be multiplied by 2,5,10
+					int n = rnd.Next (2, 5); // Since 10 is divisible by 2,5,10
 					if (n == 3) n = 5;       // 3 maps to 5
 					if (n == 4) n = 10;      // 4 maps to 10
 					Choices [i + 2] = Choices [i] * n; // Add vector that is linearly dependent with Choices[i]
@@ -100,7 +103,7 @@ public class UFO_PuzzleManager : MonoBehaviour {
 				else Choices [i + 2] = Choices [i] * Mul [i]; // Add vector that is linearly dependent with Choices[i]
 			} 
 			else {						   // If the vector is <1,3>, <3,1>, <2,3>, or <3,2>
-				Mul [i] = rnd.Next (1, 4); // Then Mul[i] can be 1-3, i.e. <3,9>, <9,3>, <6,9>, and <9,6>
+				Mul [i] = rnd.Next (2, 4); // Then Mul[i] can be 2-3, i.e. <3,9>, <9,3>, <6,9>, and <9,6> are max
 				Choices[i+2] = Choices [i] * Mul [i]; // Add vector that is linearly dependent with Choices[i]
 			}
 			int s = rnd.Next (0, 2);           //Randomly change the sign of the new vectors
@@ -118,17 +121,39 @@ public class UFO_PuzzleManager : MonoBehaviour {
 			ButtonMap [n2] = temp;
 		}
 
-		// Calculate Solution
-		Solution = Mul[0]*Choices[0] + Mul[1]*Choices[1];
+		// Calculate Solution and Goal Positions
+		if (GameMode == 0) {
+			Solution = Mul [0] * Choices [0] + Mul [1] * Choices [1];
+			GoalPosition [0] = new Vector3 (Solution.x, Height / GridSpacing, Solution.y) * GridSpacing;
+		} 
+		else {
+			Solution = Vector2.zero;
+			GoalPosition [0] = new Vector3 (Mul [0] * Choices [0].x, Height / GridSpacing, Mul [0] * Choices [0].y) * GridSpacing;
+			GoalPosition [1] = new Vector3 (Mul [1] * Choices [1].x, Height / GridSpacing, Mul [1] * Choices [1].y) * GridSpacing;
+		}
 		GetComponent<UFO_UIManager>().UpdateGame();
 
 	}
 
 	public void ResetGame () {
-		
+
 		Player.transform.position = new Vector3 (0, Height, 0); //Initialize Player Position
-		Goal.transform.position = new Vector3 (Solution.x, Height / GridSpacing, Solution.y) * GridSpacing;
+		if (GameMode == 0) {
+			Goal [0].transform.position = GoalPosition [0];
+			Goal [1].SetActive (false);
+		}
+		else {
+			Goal [0].transform.position = GoalPosition [0];
+			Goal [1].transform.position = GoalPosition [1];
+			Goal [1].SetActive (true);
+		}
 
 	}
+
+	public void ChangeGameMode (){
 		
+		GameMode = 1 - GameMode;
+
+	}
+
 }
